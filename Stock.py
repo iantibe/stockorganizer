@@ -4,6 +4,7 @@ class Stock:
         self.symbol = str(symbol)
         if trans is None:
             self.transactions = []
+        self.stock_id = None
 
     def add_transactions(self, tran):
         self.transactions.append(tran)
