@@ -8,11 +8,11 @@ class Transaction:
         if isinstance(date, datetime):
             self.date = date
         else:
-            raise ValueError
+            raise ValueError("Invalid Date object")
         if isinstance(action, Trantype):
             self.action = action
         else:
-            raise ValueError
+            raise ValueError("Invalid Tranaction Type")
         self.price = float(price)
         self.number_of_shares = int(number_of_shares)
 
