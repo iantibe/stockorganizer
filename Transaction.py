@@ -15,6 +15,7 @@ class Transaction:
             raise ValueError("Invalid Tranaction Type")
         self.price = float(price)
         self.number_of_shares = int(number_of_shares)
+        self.tran_id = -1
 
     def get_text_of_tran_type(self):
         return self.action.tran_type()

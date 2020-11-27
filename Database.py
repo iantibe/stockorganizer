@@ -4,7 +4,7 @@ from sqlite3 import Error
 from Transaction import Transaction
 from Stock import Stock
 from constants import BuyTransaction, SellTransaction
-from datetime import datetime
+import datetime
 
 class Database:
     def __init__(self):
@@ -44,7 +44,19 @@ class Database:
             con.close()
 
     def get_stock(self, symbol):
-        pass
+        try:
+            if not isinstance(symbol, str):
+                raise ValueError("Parameter is not type string")
+            stock_to_return = Stock(symbol)
+            tran_list = self.get_transactions(symbol)
+            stock_id = self.get_stock_id(stock_to_return)
+            stock_to_return.transactions = tran_list
+            stock_to_return.stock_id = stock_id
+            return stock_to_return
+        except Error:
+            print(Error.with_traceback())
+
+
 
     def create_new_stock(self, symbol):
         if not isinstance(symbol, str):
@@ -113,8 +125,36 @@ class Database:
         finally:
             conn.close()
 
+    def get_transactions(self, stock):
+        if not isinstance(stock, str):
+            raise ValueError("Invalid input parameter. Must be string")
+        try:
+            stock_to_lookup = Stock(stock)
+            stock_id_to_lookup = self.get_stock_id(stock_to_lookup)
+            sql_statement = """select p.stock, transactions.id, date, number_of_shares, price_per_share,
+                            transaction_type from transactions  inner join portfolio p on p.id = transactions.stock_id 
+                            where stock_id = ?"""
+            argument_list = []
+            argument_list.append(stock_id_to_lookup)
+            conn = self.__init_connection()
+            dataset = conn.cursor()
+            dataset.execute(sql_statement, argument_list)
+            rows = dataset.fetchall()
+            output = []
+            for x in rows:
+                time_in_datetime = datetime.datetime.strptime(x[2], "%Y-%m-%d %H:%M:%S.%f")
+                if x[5] == SellTransaction().tran_type():
+                    t_type = SellTransaction()
+                else:
+                    t_type = BuyTransaction()
+                tran_item = Transaction(x[0], time_in_datetime, t_type, x[4], x[3])
+                tran_item.tran_id = x[1]
+                output.append(tran_item)
 
-if __name__ == '__main__':
-    test = Database()
-    tran = Transaction("nyse", datetime.now(), BuyTransaction(), 25.26, 25)
-    print(test.save_transaction(tran))
+            return output
+        except Error:
+            print(Error)
+        finally:
+            conn.close()
+
+
