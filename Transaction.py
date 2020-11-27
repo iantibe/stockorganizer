@@ -16,4 +16,5 @@ class Transaction:
         self.price = float(price)
         self.number_of_shares = int(number_of_shares)
 
-
+    def get_text_of_tran_type(self):
+        return self.action.tran_type()

@@ -1,5 +1,6 @@
-from constants import SellTransaction,BuyTransaction
+from constants import SellTransaction, BuyTransaction, Trantype
 from Transaction import Transaction
+
 
 class Stock:
 
@@ -9,7 +10,9 @@ class Stock:
             self.transactions = []
         else:
             if isinstance(trans, list):
-
+                for x in trans:
+                    if not isinstance(x, Transaction):
+                        raise ValueError("Transaction list contains wrong class type")
                 self.transactions = trans
             else:
                 raise ValueError("Transaction item is not in a list")
@@ -22,4 +25,35 @@ class Stock:
             raise ValueError("Input must be type Transaction")
 
     def calculate_current_shares(self):
-        pass
+        if len(self.transactions) == 0:
+            return 0
+
+        total = 0
+
+        buyType = BuyTransaction()
+        sellType = SellTransaction()
+
+        for x in self.transactions:
+            if x.get_text_of_tran_type() == buyType.tran_type():
+                total += x.number_of_shares
+            if x.get_text_of_tran_type() == sellType.tran_type():
+                total -= x.number_of_shares
+
+        return total
+
+    def calculate_buy_or_sell_total_price(self, operation):
+        if isinstance(operation, Trantype):
+            if len(self.transactions) == 0:
+                return 0
+            total = 0
+            for x in self.transactions:
+                if x.get_text_of_tran_type() == operation.tran_type():
+                    total += x.price
+            return total
+
+        else:
+            raise ValueError("Invalid operation variable")
+
+
+
+
