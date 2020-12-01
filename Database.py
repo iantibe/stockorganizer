@@ -5,6 +5,7 @@ from Transaction import Transaction
 from Stock import Stock
 from constants import BuyTransaction, SellTransaction
 import datetime
+from custom_exceptions import NoResultsException
 
 class Database:
     def __init__(self):
@@ -30,7 +31,8 @@ class Database:
                               number_of_shares real not null,
                               price_per_share real not null,
                               transaction_type text not null,
-                              FOREIGN KEY (stock_id) REFERENCES portfolio (id));"""
+                              FOREIGN KEY (stock_id) REFERENCES portfolio (id) on delete cascade); 
+                              """
 
         try:
             con = self.__init_connection()
@@ -48,8 +50,11 @@ class Database:
             if not isinstance(symbol, str):
                 raise ValueError("Parameter is not type string")
             stock_to_return = Stock(symbol)
-            tran_list = self.get_transactions(symbol)
-            stock_id = self.get_stock_id(stock_to_return)
+            try:
+                tran_list = self.get_transactions(symbol)
+            except NoResultsException.NoResultsException:
+                tran_list = []
+            stock_id = self.get_stock_id(symbol)
             stock_to_return.transactions = tran_list
             stock_to_return.stock_id = stock_id
             return stock_to_return
@@ -83,8 +88,7 @@ class Database:
             raise ValueError
         try:
             listofitems = []
-            stock = Stock(tran.symbol)
-            stock_id = self.get_stock_id(stock)
+            stock_id = self.get_stock_id(tran.symbol)
 
             listofitems.append(stock_id)
             listofitems.append(tran.date)
@@ -101,23 +105,29 @@ class Database:
             conn.commit()
             conn.close()
             return dataset.lastrowid
+
         except Error:
             print(Error)
         finally:
             conn.close()
 
+
+
     def get_stock_id(self, stock):
-        if not isinstance(stock, Stock):
-            raise ValueError("Invalid input argument, Must Be Stock object")
+        if not isinstance(stock, str):
+            raise ValueError("Invalid input argument, Must Be string object")
         try:
             argument_list = []
-            argument_list.append(stock.symbol)
+            argument_list.append(stock)
             sql_command = """select id from portfolio
                             where stock = ?"""
             conn = self.__init_connection()
             dataset = conn.cursor()
             dataset.execute(sql_command, argument_list)
             rows = dataset.fetchall()
+            conn.close()
+            if len(rows) == 0:
+                raise NoResultsException.NoResultsException
             for x in rows:
                 return x[0]
         except Error:
@@ -129,8 +139,7 @@ class Database:
         if not isinstance(stock, str):
             raise ValueError("Invalid input parameter. Must be string")
         try:
-            stock_to_lookup = Stock(stock)
-            stock_id_to_lookup = self.get_stock_id(stock_to_lookup)
+            stock_id_to_lookup = self.get_stock_id(stock)
             sql_statement = """select p.stock, transactions.id, date, number_of_shares, price_per_share,
                             transaction_type from transactions  inner join portfolio p on p.id = transactions.stock_id 
                             where stock_id = ?"""
@@ -140,6 +149,8 @@ class Database:
             dataset = conn.cursor()
             dataset.execute(sql_statement, argument_list)
             rows = dataset.fetchall()
+            if len(rows) == 0:
+                raise NoResultsException.NoResultsException
             output = []
             for x in rows:
                 time_in_datetime = datetime.datetime.strptime(x[2], "%Y-%m-%d %H:%M:%S.%f")
@@ -157,4 +168,40 @@ class Database:
         finally:
             conn.close()
 
+    def delete_transactions(self, tran):
+        if not isinstance(tran, Transaction):
+            raise ValueError("Argument is not type Transaction")
+        try:
+            list_of_arguments = [tran.symbol]
+            sql_command = """delete from transactions
+                        where stock_id = (select id from portfolio where stock = ?)"""
+            con = self.__init_connection()
+            dataset = con.cursor()
+            dataset.execute(sql_command, list_of_arguments)
+            con.commit()
+        except Error:
+            print(Error.with_traceback())
+        finally:
+            con.close()
+
+    def delete_stock(self, stock):
+
+        if not isinstance(stock, Stock):
+            raise ValueError("Argument is not type Stock")
+
+        if len(stock.transactions) != 0:
+            for x in stock.transactions:
+                self.delete_transactions(x)
+        sql_statement = """delete from portfolio
+                        where id = ?"""
+        argument_list = [stock.stock_id]
+        try:
+            con = self.__init_connection()
+            dataset = con.cursor()
+            dataset.execute(sql_statement, argument_list)
+            con.commit()
+        except Error:
+            print(Error.with_traceback())
+        finally:
+            con.close()
 

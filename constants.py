@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 DATABASENAME = "stock_database"
 
+
 class Trantype(ABC):
     @abstractmethod
     def tran_type(self):
