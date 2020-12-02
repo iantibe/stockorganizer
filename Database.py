@@ -9,7 +9,7 @@ from custom_exceptions import NoResultsException
 
 class Database:
     def __init__(self):
-        self.create_tables()
+        pass
 
     def __init_connection(self):
         try:
@@ -31,7 +31,7 @@ class Database:
                               number_of_shares real not null,
                               price_per_share real not null,
                               transaction_type text not null,
-                              FOREIGN KEY (stock_id) REFERENCES portfolio (id) on delete cascade); 
+                              FOREIGN KEY (stock_id) REFERENCES portfolio (id)); 
                               """
 
         try:
@@ -204,4 +204,5 @@ class Database:
             print(Error.with_traceback())
         finally:
             con.close()
+
 
