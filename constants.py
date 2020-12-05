@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
+PROGRAM_NAME = "Stock Organizer"
 DATABASENAME = "stock_database"
 API_KEY = "0S5TK5I9Z6K65PMB"
-API_ERROR_MESSAGE = "Invalid API call. Please retry or visit the documentation (https://www.alphavantage.co/documentation/) for TIME_SERIES_INTRADAY."
+API_ERROR_MESSAGE = {"Error Message": "Invalid API call. Please retry or visit the documentation (https://www.alphavantage.co/documentation/) for TIME_SERIES_INTRADAY."}
 
 def generate_url(symbol):
     if isinstance(symbol, str):

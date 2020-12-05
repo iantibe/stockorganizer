@@ -6,17 +6,15 @@ from constants import BuyTransaction, SellTransaction
 from datetime import datetime
 from custom_exceptions.NoResultsException import NoResultsException as nr
 
+
 class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.testDatabase = Database()
         self.testTransaction = Transaction("test", datetime.now(), BuyTransaction(), 35.00, 10)
 
-
     def tearDown(self):
-
         del self.testDatabase
         del self.testTransaction
-
 
     def test_get_stock_id(self):
         stockid_to_add = self.testDatabase.create_new_stock("teststock")

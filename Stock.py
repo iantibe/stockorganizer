@@ -17,6 +17,8 @@ class Stock:
             else:
                 raise ValueError("Transaction item is not in a list")
         self.stock_id = None
+        self.last_price_update = None
+        self.last_price = None
 
     def add_transactions(self, tran):
         if isinstance(tran, Transaction):

@@ -194,7 +194,8 @@ class Database:
                 self.delete_transactions(x)
         sql_statement = """delete from portfolio
                         where id = ?"""
-        argument_list = [stock.stock_id]
+        argument_list = []
+        argument_list.append(stock.stock_id)
         try:
             con = self.__init_connection()
             dataset = con.cursor()
