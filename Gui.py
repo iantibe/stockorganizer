@@ -1,18 +1,27 @@
+from datetime import datetime
 from tkinter import messagebox
 from tkinter import *
 import tkinter
 import constants
+from Stock import Stock
+from Transaction import Transaction
 
 
 class Gui:
 
     def __init__(self):
+        self.stock_radio_value = None
+        self.action_for_transaction_stringVar_object = None
         self.__stocklist_object = None
         self.__portfolio_value_object = None
         self.__dow_ticker_value_object = None
         self.__nasdaq_ticker_value_object = None
         self.__nyse_ticker_value_object = None
         self.__status_object = None
+        self.__stock_display_total = 0
+        self.__stock_entry_entry_object = None
+        self.__stock_entry_value = None
+        self.__stock_entry_window_object = None
 
     def generate_info_popup(self, header, message):
         messagebox.showinfo(header, message)
@@ -37,7 +46,7 @@ class Gui:
         main_menu.add_cascade(label='Transaction', menu=tran_menu)
         main_menu.add_cascade(label='Exit', menu=exit_menu)
 
-        stock_menu.add_command(label="Add Stock", command=self.dummy_command)
+        stock_menu.add_command(label="Add Stock", command=self.enter_stock_window)
         stock_menu.add_command(label="Delete Stock", command=self.dummy_command)
 
         tran_menu.add_command(label='Add Transaction', command=self.dummy_command)
@@ -114,20 +123,121 @@ class Gui:
         ticker_refresh_button = Button(middle_frame, width=15, text='Refresh Ticker')
         ticker_refresh_button.grid(row=0, column=0)
 
-        stock_label = Label(label_frame, bd=2, text='STOCK               PRICE               DATE OF LAST PRICE               QUANITY               STOCK TOTAL')
+        stock_label = Label(label_frame, bd=2, text='STOCK                  PRICE               DATE OF LAST PRICE           QUANITY           STOCK TOTAL')
         stock_label.grid_propagate(0)
         stock_label.grid(row=0)
-
         top_level_window.mainloop()
+
+    def enter_stock_window(self):
+        root_window = tkinter.Tk()
+        root_window.title("Add Stock")
+        entry_frame = Frame(root_window)
+        button_frame = Frame(root_window)
+        entry_frame.pack()
+        button_frame.pack(side=BOTTOM)
+        enter_button = Button(button_frame, text='Enter', command=self.process_stock_entry)
+        exit_button = Button(button_frame, text='Cancel', command=root_window.destroy)
+        enter_button.pack(side=LEFT)
+        exit_button.pack()
+        entry_label = Label(entry_frame, text="Enter stock symbol")
+        entry_widget = Entry(entry_frame)
+        entry_widget.pack(side=RIGHT)
+        entry_label.pack(side=LEFT)
+        self.__stock_entry_entry_object = entry_widget
+        self.__stock_entry_window_object = root_window
+        root_window.mainloop()
+
+    def process_stock_entry(self):
+        # TODO add code here to process stock
+        self.__stock_entry_value = self.__stock_entry_entry_object.get()
+        self.__stock_entry_window_object.destroy()
+
+
+    def enter_transaction_window(self):
+        root_window = tkinter.Tk()
+
+        radio_frame = Frame(root_window)
+        radio_frame.grid(row=0)
+        entry_frame = Frame(root_window)
+        entry_frame.grid(row=1)
+        button_frame = Frame(root_window)
+        button_frame.grid(row=2)
+
+        enter_button = Button(button_frame, text='Enter', command=self.dummy_command)
+        enter_button.grid(row=0, column=0)
+
+        cancel_button = Button(button_frame, text='Cancel', command=root_window.destroy)
+        cancel_button.grid(row=0, column=1)
+
+
+        date_entry_label = Label(entry_frame, text='Enter Date:')
+        date_entry = Entry(entry_frame)
+        date_entry_label.grid(row=0, column=0)
+        date_entry.grid(row=0, column=1)
+
+        self.action_for_transaction_stringVar_object = StringVar()
+        radio_label = Label(entry_frame, text='Select Transaction')
+        buy_radio = Radiobutton(entry_frame, text='Buy', value='buy', variable=self.action_for_transaction_stringVar_object)
+        sell_radio = Radiobutton(entry_frame, text='Sell', value='sell', variable=self.action_for_transaction_stringVar_object)
+        radio_label.grid(row=1, column=0)
+        buy_radio.grid(row=1, column=1)
+        sell_radio.grid(row=1, column=2)
+
+        share_label = Label(entry_frame, text='Shares:')
+        share_entry = Entry(entry_frame)
+        share_label.grid(row=2, column=0)
+        share_entry.grid(row=2, column=1)
+
+        price_label = Label(entry_frame, text='Price:')
+        price_entry = Entry(entry_frame)
+        price_label.grid(row=3, column=0)
+        price_entry.grid(row=3, column=1)
+
+        #TODO Remove test data, add mechanism to input into method
+        testStock1 = Stock("nyse")
+        testStock2 = Stock("aapl")
+
+        stock_list = [testStock2, testStock1]
+
+        self.stock_radio_value = StringVar()
+        for x in range(len(stock_list)):
+            radio = Radiobutton(radio_frame, text=stock_list[x].symbol, variable=self.stock_radio_value, value=stock_list[x].symbol)
+            radio.grid(row=x)
+
+        root_window.mainloop()
+
+    def process_transaction_entry(self):
+        # TODO Add code here to process the transaction
+        pass
 
     def adjust_status(self, message):
         self.__status_object.config(text=message)
 
     def adjust_stock_list(self, list_of_stocks):
+        self.__stock_display_total = 0
+        insert_string = ""
         if not isinstance(list_of_stocks, list):
             raise ValueError("Wrong input type")
-        for x in list_of_stocks:
-            self.__stocklist_object.insert(END, x)
+        if len(list_of_stocks) == 0:
+            self.__stocklist_object.insert(END, "No stocks saved")
+        else:
+            for x in list_of_stocks:
+                insert_string += x.symbol
+                insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
+                insert_string += str(x.last_price)
+                insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
+                insert_string += str(x.last_price_update)
+                insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
+                insert_string += str(x.calculate_current_shares())
+                insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
+                insert_string += str(x.calculate_current_shares()*x.last_price)
+                self.__stock_display_total += x.calculate_current_shares() * x.last_price
+                self.__stocklist_object.insert(END, insert_string)
+                insert_string = ""
+        # TODO put total calculations in own method
+        self.adjust_portfolio_value(str(self.__stock_display_total))
+
+
 
     def clear_stock_list(self):
         self.__stocklist_object.delete(0, END)
@@ -155,8 +265,8 @@ class Gui:
             raise ValueError("Invalid input, use string")
         self.__portfolio_value_object.config(text=text)
 
-    
+
 if __name__ == '__main__':
     test = Gui()
-    test.main_window()
+    test.enter_stock_window()
 
