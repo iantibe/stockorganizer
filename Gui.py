@@ -10,7 +10,13 @@ from Transaction import Transaction
 class Gui:
 
     def __init__(self):
-        self.stock_radio_value = None
+        self.enter_transaction_window_date_entry = None
+        self.enter_transaction_window_price_entry = None
+        self.enter_transaction_window_share_entry = None
+        self.enter_transaction_window_object = None
+        self.delete_stock_window_object = None
+        self.delete_stock_radio_value = None
+        self.enter_transaction_stock_radio_value = None
         self.action_for_transaction_stringVar_object = None
         self.__stocklist_object = None
         self.__portfolio_value_object = None
@@ -20,7 +26,6 @@ class Gui:
         self.__status_object = None
         self.__stock_display_total = 0
         self.__stock_entry_entry_object = None
-        self.__stock_entry_value = None
         self.__stock_entry_window_object = None
 
     def generate_info_popup(self, header, message):
@@ -148,14 +153,18 @@ class Gui:
         root_window.mainloop()
 
     def process_stock_entry(self):
+        pass
         # TODO add code here to process stock
-        self.__stock_entry_value = self.__stock_entry_entry_object.get()
-        self.__stock_entry_window_object.destroy()
 
 
-    def enter_transaction_window(self):
+
+    def enter_transaction_window(self, stock_list):
+        if not isinstance(stock_list, list):
+            raise ValueError("Argument is not type list")
+
         root_window = tkinter.Tk()
-
+        root_window.title("Enter New Transaction")
+        self.enter_transaction_window_object = root_window
         radio_frame = Frame(root_window)
         radio_frame.grid(row=0)
         entry_frame = Frame(root_window)
@@ -163,15 +172,15 @@ class Gui:
         button_frame = Frame(root_window)
         button_frame.grid(row=2)
 
-        enter_button = Button(button_frame, text='Enter', command=self.dummy_command)
+        enter_button = Button(button_frame, text='Enter', command=self.process_transaction_entry)
         enter_button.grid(row=0, column=0)
 
         cancel_button = Button(button_frame, text='Cancel', command=root_window.destroy)
         cancel_button.grid(row=0, column=1)
 
-
         date_entry_label = Label(entry_frame, text='Enter Date:')
         date_entry = Entry(entry_frame)
+        self.enter_transaction_window_date_entry = date_entry
         date_entry_label.grid(row=0, column=0)
         date_entry.grid(row=0, column=1)
 
@@ -185,23 +194,19 @@ class Gui:
 
         share_label = Label(entry_frame, text='Shares:')
         share_entry = Entry(entry_frame)
+        self.enter_transaction_window_share_entry = share_entry
         share_label.grid(row=2, column=0)
         share_entry.grid(row=2, column=1)
 
         price_label = Label(entry_frame, text='Price:')
         price_entry = Entry(entry_frame)
+        self.enter_transaction_window_price_entry = price_entry
         price_label.grid(row=3, column=0)
         price_entry.grid(row=3, column=1)
 
-        #TODO Remove test data, add mechanism to input into method
-        testStock1 = Stock("nyse")
-        testStock2 = Stock("aapl")
-
-        stock_list = [testStock2, testStock1]
-
-        self.stock_radio_value = StringVar()
+        self.enter_transaction_stock_radio_value = StringVar()
         for x in range(len(stock_list)):
-            radio = Radiobutton(radio_frame, text=stock_list[x].symbol, variable=self.stock_radio_value, value=stock_list[x].symbol)
+            radio = Radiobutton(radio_frame, text=stock_list[x].symbol, variable=self.enter_transaction_stock_radio_value, value=stock_list[x].symbol)
             radio.grid(row=x)
 
         root_window.mainloop()
@@ -210,11 +215,42 @@ class Gui:
         # TODO Add code here to process the transaction
         pass
 
+    def delete_stock_window(self, stockList):
+        if not isinstance(stockList, list):
+            raise ValueError("Input value is not in a list format")
+
+        root = tkinter.Tk()
+        root.title("Delete Stock")
+        self.delete_stock_window_object = root
+        selection_frame = Frame(root)
+        button_frame = Frame(root)
+
+        selection_frame.grid(row=0)
+        button_frame.grid(row=1)
+
+        exit_button = Button(button_frame, text='Exit', command=root.destroy)
+        enter_button = Button(button_frame, text='Enter', command=self.process_delete_stock)
+        exit_button.grid(row=0, column=1)
+        enter_button.grid(row=0, column=0)
+
+        self.delete_stock_radio_value = StringVar()
+        for x in range(len(stockList)):
+            radio = Radiobutton(selection_frame, text=stockList[x].symbol, variable=self.delete_stock_radio_value,
+                                value=stockList[x].symbol)
+            radio.grid(row=x)
+
+        root.mainloop()
+
+    def process_delete_stock(self):
+        pass
+
+
     def adjust_status(self, message):
         self.__status_object.config(text=message)
 
     def adjust_stock_list(self, list_of_stocks):
         self.__stock_display_total = 0
+        self.clear_stock_list()
         insert_string = ""
         if not isinstance(list_of_stocks, list):
             raise ValueError("Wrong input type")
@@ -236,8 +272,6 @@ class Gui:
                 insert_string = ""
         # TODO put total calculations in own method
         self.adjust_portfolio_value(str(self.__stock_display_total))
-
-
 
     def clear_stock_list(self):
         self.__stocklist_object.delete(0, END)
@@ -267,6 +301,11 @@ class Gui:
 
 
 if __name__ == '__main__':
+    testStock1 = Stock("nyse")
+    testStock2 = Stock("aapl")
+
+    stock_list = [testStock2, testStock1]
+
     test = Gui()
-    test.enter_stock_window()
+    test.delete_stock_window(stock_list)
 
