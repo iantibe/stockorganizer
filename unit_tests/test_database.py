@@ -72,6 +72,8 @@ class MyTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.testDatabase.delete_transactions("test")
 
+    def test_get_all_stocks(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

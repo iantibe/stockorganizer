@@ -9,7 +9,7 @@ from custom_exceptions import NoResultsException
 
 class Database:
     def __init__(self):
-        pass
+        self.create_tables()
 
     def __init_connection(self):
         try:
@@ -153,7 +153,9 @@ class Database:
                 raise NoResultsException.NoResultsException
             output = []
             for x in rows:
-                time_in_datetime = datetime.datetime.strptime(x[2], "%Y-%m-%d %H:%M:%S.%f")
+                #time_in_datetime = datetime.datetime.strptime(x[2], "%Y-%m-%d %H:%M:%S.%f")
+                #time_in_datetime = datetime.datetime.strptime(x[2], "%Y-%m-%d")
+                time_in_datetime = datetime.datetime.strptime(x[2], "%Y-%m-%d %H:%M:%S")
                 if x[5] == SellTransaction().tran_type():
                     t_type = SellTransaction()
                 else:
@@ -201,6 +203,24 @@ class Database:
             dataset = con.cursor()
             dataset.execute(sql_statement, argument_list)
             con.commit()
+        except Error:
+            print(Error.with_traceback())
+        finally:
+            con.close()
+
+    def get_all_stocks(self):
+        sql_statement = """select id, stock from portfolio"""
+        list_to_return =[]
+        try:
+            con = self.__init_connection()
+            dataset = con.cursor()
+            dataset.execute(sql_statement)
+            con.commit()
+            for x in dataset:
+                item = Stock(x[1])
+                item.stock_id = x[0]
+                list_to_return.append(item)
+            return list_to_return
         except Error:
             print(Error.with_traceback())
         finally:

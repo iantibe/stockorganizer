@@ -5,11 +5,15 @@ import tkinter
 import constants
 from Stock import Stock
 from Transaction import Transaction
+from constants import BuyTransaction, SellTransaction
+from Database import Database
 
 
 class Gui:
 
     def __init__(self):
+        self.delete_transaction_get_transaction_window_object = None
+        self.delete_transaction_get_stock_window_object = None
         self.enter_transaction_window_date_entry = None
         self.enter_transaction_window_price_entry = None
         self.enter_transaction_window_share_entry = None
@@ -54,7 +58,7 @@ class Gui:
         stock_menu.add_command(label="Add Stock", command=self.enter_stock_window)
         stock_menu.add_command(label="Delete Stock", command=self.dummy_command)
 
-        tran_menu.add_command(label='Add Transaction', command=self.dummy_command)
+        tran_menu.add_command(label='Add Transaction', command=self.enter_transaction_window)
         tran_menu.add_command(label='Delete Transaction', command=self.dummy_command)
 
         exit_menu.add_command(label='Exit', command=top_level_window.destroy)
@@ -153,16 +157,17 @@ class Gui:
         root_window.mainloop()
 
     def process_stock_entry(self):
-        pass
-        # TODO add code here to process stock
+        stock_name_to_add = self.__stock_entry_entry_object.get()
+        database = Database()
+        database.create_new_stock(stock_name_to_add)
+        self.__stock_entry_window_object.destroy()
+        self.adjust_status("New Stock Added")
 
+    def enter_transaction_window(self):
 
-
-    def enter_transaction_window(self, stock_list):
-        if not isinstance(stock_list, list):
-            raise ValueError("Argument is not type list")
-
-        root_window = tkinter.Tk()
+        database = Database()
+        stock_list = database.get_all_stocks()
+        root_window = Toplevel()
         root_window.title("Enter New Transaction")
         self.enter_transaction_window_object = root_window
         radio_frame = Frame(root_window)
@@ -211,9 +216,25 @@ class Gui:
 
         root_window.mainloop()
 
+
     def process_transaction_entry(self):
-        # TODO Add code here to process the transaction
-        pass
+
+        action_object = None
+        stock_name = self.enter_transaction_stock_radio_value.get()
+        price = self.enter_transaction_window_price_entry.get()
+        stock_quanity = self.enter_transaction_window_share_entry.get()
+        date_to_save = datetime.strptime(self.enter_transaction_window_date_entry.get(), "%m-%d-%Y")
+
+        if self.action_for_transaction_stringVar_object.get() == 'buy':
+            action_object = BuyTransaction()
+        else:
+            action_object = SellTransaction()
+
+        transactions_to_save = Transaction(stock_name, date_to_save, action_object, price, stock_quanity)
+        database = Database()
+        database.save_transaction(transactions_to_save)
+        self.enter_transaction_window_object.destroy()
+        self.adjust_status("New Transaction Added")
 
     def delete_stock_window(self, stockList):
         if not isinstance(stockList, list):
@@ -242,8 +263,93 @@ class Gui:
         root.mainloop()
 
     def process_delete_stock(self):
+        # TODO Add code here to process a delete of a stock
         pass
 
+    def delete_transaction_get_stock_window(self, stockList):
+        if not isinstance(stockList, list):
+            raise ValueError("Input value is not in a list format")
+
+        root_window = tkinter.Tk()
+        root_window.title("Delete Transaction")
+        self.delete_transaction_get_stock_window_object = root_window
+        selection_frame = Frame(root_window)
+        button_frame = Frame(root_window)
+
+        selection_frame.grid(row=0)
+        button_frame.grid(row=1)
+
+        exit_button = Button(button_frame, text='Exit', command=root_window.destroy)
+        enter_button = Button(button_frame, text='Enter', command=root_window.destroy)
+        exit_button.grid(row=0, column=1)
+        enter_button.grid(row=0, column=0)
+
+        selected_stock = StringVar()
+
+        for x in range(len(stockList)):
+            radio = Radiobutton(selection_frame, text=stockList[x].symbol, variable=selected_stock,
+                                value=stockList[x].symbol)
+            radio.grid(row=x)
+
+        root_window.mainloop()
+
+        if len(selected_stock.get()) == 0:
+            return -1
+        else:
+            return selected_stock.get()
+
+    def delete_transaction_get_transaction_window(self, tran_list):
+        if not isinstance(tran_list, list):
+            raise ValueError("Invalid parameter type. Parameter must be of type list")
+
+        root_window = tkinter.Tk()
+        root_window.title("Delete Transaction")
+        self.delete_transaction_get_transaction_window_object = root_window
+
+        selection_frame = Frame(root_window)
+        button_frame = Frame(root_window)
+        label_frame = Frame(root_window)
+
+        selection_frame.grid(row=1)
+        button_frame.grid(row=2)
+        label_frame.grid(row=0)
+
+        label = Label(label_frame, text='           Stock Transaction Price Shares')
+        label.grid(row=0)
+
+        exit_button = Button(button_frame, text='Exit', command=root_window.destroy)
+        enter_button = Button(button_frame, text='Enter', command=root_window.destroy)
+        exit_button.grid(row=0, column=1)
+        enter_button.grid(row=0, column=0)
+
+        selected_tran = StringVar()
+
+        for x in range(len(tran_list)):
+            radio = Radiobutton(selection_frame, text=tran_list[x].symbol + "    " + tran_list[x].action.tran_type()
+                                + "      " + str(tran_list[x].price) + "        " + str(tran_list[x].number_of_shares)
+                                , variable=selected_tran,
+                                value=tran_list[x].tran_id)
+            radio.grid(row=x)
+
+        root_window.mainloop()
+
+        return selected_tran.get()
+
+    def execute_delete_transaction(self):
+        # todo add code for delete tran here
+        # todo remove test data
+        tran1 = Transaction("test1",datetime.now(), BuyTransaction(), 25, 25 )
+        tran2 = Transaction("test2", datetime.now(), BuyTransaction(), 15, 15)
+
+        tran1.tran_id = 1
+        tran2.tran_id = 2
+
+        tran_lis = [tran1, tran2]
+
+        print(self.delete_transaction_get_transaction_window(tran_lis))
+
+    def destroy_delete_transaction_sequence(self):
+        pass
 
     def adjust_status(self, message):
         self.__status_object.config(text=message)
@@ -301,11 +407,6 @@ class Gui:
 
 
 if __name__ == '__main__':
-    testStock1 = Stock("nyse")
-    testStock2 = Stock("aapl")
-
-    stock_list = [testStock2, testStock1]
-
     test = Gui()
-    test.delete_stock_window(stock_list)
-
+    test.main_window()
+    #test.enter_transaction_window()
