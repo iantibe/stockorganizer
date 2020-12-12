@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import *
 import tkinter
 import constants
+from Api import Api
 from Stock import Stock
 from Transaction import Transaction
 from constants import BuyTransaction, SellTransaction
@@ -131,7 +132,7 @@ class Gui:
         portfolio_value.grid_propagate(0)
         portfolio_value.grid(row=0, column=3, sticky=E)
 
-        stock_refresh_button = Button(middle_frame, width=15, text='Refresh Stock List')
+        stock_refresh_button = Button(middle_frame, width=15, text='Refresh Stock List', command=self.generate_main_stock_window_list)
         stock_refresh_button.grid(row=0, column=1)
 
         ticker_refresh_button = Button(middle_frame, width=15, text='Refresh Ticker')
@@ -140,6 +141,7 @@ class Gui:
         stock_label = Label(label_frame, bd=2, text='STOCK                  PRICE               DATE OF LAST PRICE           QUANITY           STOCK TOTAL')
         stock_label.grid_propagate(0)
         stock_label.grid(row=0)
+        self.generate_main_stock_window_list()
         top_level_window.mainloop()
 
     def enter_stock_window(self):
@@ -312,24 +314,29 @@ class Gui:
 
         self.selected_tran_for_delete = StringVar()
 
+        label = Label(self.tran_output_frame, text='           Stock Transaction Price Shares')
+        label.grid(row=0)
+
         for x in range(len(tran_list)):
              radio = Radiobutton(self.tran_output_frame, text=tran_list[x].symbol + "    " + tran_list[x].action.tran_type()
                                                           + "      " + str(tran_list[x].price) + "        " + str(
              tran_list[x].number_of_shares)
                            , variable=self.selected_tran_for_delete,
                           value=tran_list[x].tran_id)
-             radio.grid(row=x)
+             radio.grid(row=x+1)
 
 
     def process_delete_transaction(self):
         database = Database()
         database.delete_individual_transaction_using_primary_key(self.selected_tran_for_delete.get())
         self.delete_transaction_get_stock_window_object.destroy()
-
+        self.adjust_status("Transaction deleted")
 
 
     def adjust_status(self, message):
         self.__status_object.config(text=message)
+
+
 
     def adjust_stock_list(self, list_of_stocks):
         self.__stock_display_total = 0
@@ -359,9 +366,6 @@ class Gui:
     def clear_stock_list(self):
         self.__stocklist_object.delete(0, END)
 
-    def dummy_command(self):
-        print("dummy_command_execute")
-
     def adjust_nyse_value(self, text):
         if not isinstance(text, str):
             raise ValueError("Invalid input, use string")
@@ -382,6 +386,23 @@ class Gui:
             raise ValueError("Invalid input, use string")
         self.__portfolio_value_object.config(text=text)
 
+    def generate_main_stock_window_list(self):
+        database = Database()
+        complete_list_of_stocks = []
+        list_of_bare_stocks = database.get_all_stocks()
+        ready_for_display_stocks = []
+
+        for x in list_of_bare_stocks:
+             item = database.get_stock(x.symbol)
+             complete_list_of_stocks.append(item)
+
+        api = Api()
+
+        for z in complete_list_of_stocks:
+            item = api.get_stock_quote(z)
+            ready_for_display_stocks.append(item)
+
+        self.adjust_stock_list(ready_for_display_stocks)
 
 if __name__ == '__main__':
     test = Gui()
