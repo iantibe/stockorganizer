@@ -226,4 +226,18 @@ class Database:
         finally:
             con.close()
 
+    def delete_individual_transaction_using_primary_key(self, primary_key):
+        sql_statement = """delete from transactions where id = ?"""
+        argument_list = [primary_key]
+
+        try:
+            conn = self.__init_connection()
+            dataset = conn.cursor()
+            dataset.execute(sql_statement, argument_list)
+            conn.commit()
+        except Error:
+            print(Error.with_traceback())
+        finally:
+            conn.close()
+
 
