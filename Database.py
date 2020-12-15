@@ -227,6 +227,8 @@ class Database:
             con.close()
 
     def delete_individual_transaction_using_primary_key(self, primary_key):
+        if not isinstance(primary_key, int):
+            raise ValueError("Wrong argument. Argument must be an integer")
         sql_statement = """delete from transactions where id = ?"""
         argument_list = [primary_key]
 

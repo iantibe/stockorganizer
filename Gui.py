@@ -404,7 +404,61 @@ class Gui:
 
         self.adjust_stock_list(ready_for_display_stocks)
 
+    def profit_loss_window(self, stocklist):
+
+        if not isinstance(stocklist, list):
+            raise ValueError("Wrong input type")
+        root = tkinter.Tk()
+
+        label_frame = Frame(root)
+        data_frame = Frame(root)
+
+        label_frame.grid(row=0)
+        data_frame.grid(row=1)
+
+        label = Label(label_frame, text='Stock   Total Buy Price     Total Sell Price   current holding  Profit')
+        data = Listbox(data_frame, width=250)
+        label.grid(row=0)
+        data.grid(row=0)
+
+        if len(stocklist) == 0:
+            data.insert(END, "No stocks saved")
+        else:
+            insert_string = ""
+            total_buy = 0
+            total_Sell = 0
+            for x in stocklist:
+                insert_string += x.symbol
+                insert_string += "   "
+                insert_string += "$" + str(x.calculate_buy_or_sell_total_price(BuyTransaction()))
+                total_buy = x.calculate_buy_or_sell_total_price(BuyTransaction())
+                insert_string += "   "
+                insert_string += "$" + str(x.calculate_buy_or_sell_total_price(SellTransaction()))
+                total_Sell = x.calculate_buy_or_sell_total_price(SellTransaction())
+                insert_string += "   "
+                insert_string += str(x.last_price * x.calculate_current_shares())
+                total_Sell += x.last_price * x.calculate_current_shares()
+
+                insert_string += "$" + str(total_Sell - total_buy)
+                data.insert(END, insert_string)
+                total_Sell = 0
+                total_buy = 0
+
+        root.mainloop()
+
 if __name__ == '__main__':
     test = Gui()
 
-    test.main_window()
+    tran1 = Transaction("test", datetime.now(), BuyTransaction(), 10, 10)
+    tran2 = Transaction("test", datetime.now(), SellTransaction(), 10, 5)
+
+    tran_list = [tran1, tran2]
+
+    teststock = Stock("test")
+    teststock.last_price = 2.50
+    teststock.transactions = tran_list
+
+    inputstock = [teststock]
+
+    test.profit_loss_window(inputstock)
+

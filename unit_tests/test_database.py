@@ -30,14 +30,18 @@ class MyTestCase(unittest.TestCase):
             self.testDatabase.get_stock_id("ian")
 
     def test_get_stock(self):
-        pass
+        self.testDatabase.create_new_stock("test_get_stock")
+        testStock = self.testDatabase.get_stock("test_get_stock")
+        self.assertEqual(testStock.symbol, "test_get_stock")
 
     def test_wrong_parameter_get_stock(self):
         with self.assertRaises(ValueError):
             self.testDatabase.get_stock(5)
 
     def test_get_stock_with_no_saved_transactions(self):
-        pass
+        self.testDatabase.create_new_stock("test_get_stock_with_no_saved_transactions")
+        testStock = self.testDatabase.get_stock("test_get_stock_with_no_saved_transactions")
+        self.assertEqual(len(testStock.transactions), 0)
 
     def test_create_new_stock(self):
         self.testDatabase.create_new_stock("testfile")
@@ -73,7 +77,16 @@ class MyTestCase(unittest.TestCase):
             self.testDatabase.delete_transactions("test")
 
     def test_get_all_stocks(self):
+        self.testDatabase.create_new_stock("test")
+        group_of_stocks = self.testDatabase.get_all_stocks()
+        self.assertTrue(len(group_of_stocks) >= 1)
+
+    def test_delete_individual_transaction_using_primary_key(self):
         pass
+
+    def test_wrong_argument_delete_individual_transaction_using_primary_key(self):
+        with self.assertRaises(ValueError):
+            self.testDatabase.delete_individual_transaction_using_primary_key("a")
 
 if __name__ == '__main__':
     unittest.main()
