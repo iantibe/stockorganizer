@@ -1,3 +1,10 @@
+"""
+Name of Program: test_database.py
+Author: Ian Tibe
+Date of last modification: 12/16/2020
+
+Unit tests for Database class
+"""
 import unittest
 from Database import Database
 from Transaction import Transaction
@@ -17,7 +24,7 @@ class MyTestCase(unittest.TestCase):
         del self.testTransaction
 
     def test_get_stock_id(self):
-        stockid_to_add = self.testDatabase.create_new_stock("teststock")
+        self.testDatabase.create_new_stock("teststock")
         itemtotest = self.testDatabase.get_stock("teststock")
         self.assertEqual(self.testDatabase.get_stock_id("teststock"), itemtotest.stock_id)
 
@@ -59,9 +66,6 @@ class MyTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.testDatabase.save_transaction(Stock("test"))
 
-    def test_return_value_save_transaction(self):
-        pass
-
     def test_get_transaction(self):
         pass
 
@@ -87,6 +91,7 @@ class MyTestCase(unittest.TestCase):
     def test_wrong_argument_delete_individual_transaction_using_primary_key(self):
         with self.assertRaises(ValueError):
             self.testDatabase.delete_individual_transaction_using_primary_key("a")
+
 
 if __name__ == '__main__':
     unittest.main()

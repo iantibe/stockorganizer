@@ -1,8 +1,16 @@
+"""
+Program name: test_stock.py
+Author: Ian Tibe
+Date of last modification: 12/16/2020
+
+Unit tests for Stock class
+"""
 import unittest
 from Stock import Stock
 from Transaction import Transaction
 from constants import BuyTransaction, SellTransaction
 from datetime import datetime
+
 
 class MyTestCase(unittest.TestCase):
 
@@ -107,6 +115,7 @@ class MyTestCase(unittest.TestCase):
         testObj = Stock("test")
         with self.assertRaises(ValueError):
             testObj.calculate_buy_or_sell_total_price("test")
+
 
 if __name__ == '__main__':
     unittest.main()

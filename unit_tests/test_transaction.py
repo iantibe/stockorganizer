@@ -1,7 +1,15 @@
+"""
+Name of program: test_transaction.py
+Author: Ian Tibe
+Date of last modification: 12/16/2020
+
+Unit test for Transaction class
+"""
 import unittest
 from Transaction import Transaction
 from datetime import datetime
 from constants import BuyTransaction
+
 
 class MyTestCase(unittest.TestCase):
 

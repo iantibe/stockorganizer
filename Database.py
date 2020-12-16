@@ -1,3 +1,12 @@
+"""
+Name of Program: Gui.py
+Author: Ian Tibe
+Date of last modification: 12/16/2020
+
+Class definition for Database.py
+Class defines methods to access database
+"""
+
 import constants
 import sqlite3
 from sqlite3 import Error
@@ -7,11 +16,19 @@ from constants import BuyTransaction, SellTransaction
 import datetime
 from custom_exceptions import NoResultsException
 
+
 class Database:
     def __init__(self):
+        """
+        Constructor
+        """
         self.create_tables()
 
     def __init_connection(self):
+        """
+        Creates connection to SqLite database
+        :return: None
+        """
         try:
             connection = sqlite3.connect(constants.DATABASENAME)
             return connection
@@ -19,7 +36,10 @@ class Database:
             raise Error
 
     def create_tables(self):
-
+        """
+        Creates tables for database
+        :return: None
+        """
         sql_portfolio = """create table if not exists portfolio (
                         id integer primary key, 
                         stock text not null);"""
@@ -33,7 +53,6 @@ class Database:
                               transaction_type text not null,
                               FOREIGN KEY (stock_id) REFERENCES portfolio (id)); 
                               """
-
         try:
             con = self.__init_connection()
             dataset = con.cursor()
@@ -46,6 +65,11 @@ class Database:
             con.close()
 
     def get_stock(self, symbol):
+        """
+        Returns a stock object containing the information from the database.
+        :param symbol: String of stock ticker symbol
+        :return: Stock object
+        """
         try:
             if not isinstance(symbol, str):
                 raise ValueError("Parameter is not type string")
@@ -61,9 +85,12 @@ class Database:
         except Error:
             print(Error.with_traceback())
 
-
-
     def create_new_stock(self, symbol):
+        """
+        Creates new stock in database
+        :param symbol: String of ticker symbol
+        :return: None
+        """
         if not isinstance(symbol, str):
             raise ValueError
         try:
@@ -84,6 +111,11 @@ class Database:
             conn.close()
 
     def save_transaction(self, tran):
+        """
+        Saves a stock transaction to the database
+        :param tran: Transaction object
+        :return: None
+        """
         if not isinstance(tran, Transaction):
             raise ValueError
         try:
@@ -104,16 +136,18 @@ class Database:
             dataset.execute(sql_statement, listofitems)
             conn.commit()
             conn.close()
-            return dataset.lastrowid
-
+            # return dataset.lastrowid
         except Error:
             print(Error)
         finally:
             conn.close()
 
-
-
     def get_stock_id(self, stock):
+        """
+        Returns stock id number (primary key) of existing stock
+        :param stock: String of stock ticker symbol
+        :return: integer of stock id number
+        """
         if not isinstance(stock, str):
             raise ValueError("Invalid input argument, Must Be string object")
         try:
@@ -136,6 +170,11 @@ class Database:
             conn.close()
 
     def get_transactions(self, stock):
+        """
+        Returns a list of all transactions for a given stock
+        :param stock: String of stock ticker symbol
+        :return: All transactions for a given stock in a list
+        """
         if not isinstance(stock, str):
             raise ValueError("Invalid input parameter. Must be string")
         try:
@@ -163,7 +202,6 @@ class Database:
                 tran_item = Transaction(x[0], time_in_datetime, t_type, x[4], x[3])
                 tran_item.tran_id = x[1]
                 output.append(tran_item)
-
             return output
         except Error:
             print(Error)
@@ -171,6 +209,11 @@ class Database:
             conn.close()
 
     def delete_transactions(self, tran):
+        """
+        Deletes all transaction of a given stock
+        :param tran: Transaction from a given stock
+        :return: None
+        """
         if not isinstance(tran, Transaction):
             raise ValueError("Argument is not type Transaction")
         try:
@@ -187,7 +230,11 @@ class Database:
             con.close()
 
     def delete_stock(self, stock):
-
+        """
+        Deletes a stock and all transactions
+        :param stock: Stock object
+        :return: None
+        """
         if not isinstance(stock, Stock):
             raise ValueError("Argument is not type Stock")
 
@@ -209,6 +256,10 @@ class Database:
             con.close()
 
     def get_all_stocks(self):
+        """
+        Gets All stocks from the database with no transaction data
+        :return: List of stock objects
+        """
         sql_statement = """select id, stock from portfolio"""
         list_to_return =[]
         try:
@@ -227,6 +278,11 @@ class Database:
             con.close()
 
     def delete_individual_transaction_using_primary_key(self, primary_key):
+        """
+        Deletes individual transaction given an transaction primary key
+        :param primary_key: integer primary key of transaction
+        :return: None
+        """
         if not isinstance(primary_key, int):
             raise ValueError("Wrong argument. Argument must be an integer")
         sql_statement = """delete from transactions where id = ?"""
@@ -241,5 +297,3 @@ class Database:
             print(Error.with_traceback())
         finally:
             conn.close()
-
-

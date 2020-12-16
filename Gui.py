@@ -1,3 +1,10 @@
+"""
+Name of Program: Gui.py
+Author: Ian Tibe
+Date of last modification: 12/16/2020
+
+Class definition for Gui
+"""
 from datetime import datetime
 from tkinter import messagebox
 from tkinter import *
@@ -11,8 +18,10 @@ from Database import Database
 
 
 class Gui:
-
     def __init__(self):
+        """
+        Constructor
+        """
         self.selected_tran_for_delete = None
         self.tran_output_frame = None
         self.top_window = None
@@ -38,16 +47,32 @@ class Gui:
         self.__stock_entry_window_object = None
 
     def generate_info_popup(self, header, message):
+        """
+        Generates into popup window
+        :param header: Window Title
+        :param message: Message
+        :return: None
+        """
         messagebox.showinfo(header, message)
 
     def generate_error_popup(self, header, message):
+        """
+        Generates Erro popup window
+        :param header: Window title
+        :param message: message
+        :return: None
+        """
         messagebox.showerror(header, message)
 
     def main_window(self):
+        """
+        Generates main main window
+        :return: none
+        """
         top_level_window = tkinter.Tk()
         self.top_window = top_level_window
         top_level_window.title(constants.PROGRAM_NAME)
-        #top_level_window.grid_propagate(0)
+        # top_level_window.grid_propagate(0)
 
         # menu build
         main_menu = tkinter.Menu()
@@ -55,21 +80,26 @@ class Gui:
 
         stock_menu = Menu(main_menu)
         tran_menu = Menu(main_menu)
+        report_menu = Menu(main_menu)
         exit_menu = Menu(main_menu)
 
         main_menu.add_cascade(label='Stock', menu=stock_menu)
         main_menu.add_cascade(label='Transaction', menu=tran_menu)
+        main_menu.add_cascade(label='Report', menu=report_menu)
         main_menu.add_cascade(label='Exit', menu=exit_menu)
 
         stock_menu.add_command(label="Add Stock", command=self.enter_stock_window)
         stock_menu.add_command(label="Delete Stock", command=self.delete_stock_window)
+
+        report_menu.add_command(label='Profit Report', command=self.profit_loss_window)
 
         tran_menu.add_command(label='Add Transaction', command=self.enter_transaction_window)
         tran_menu.add_command(label='Delete Transaction', command=self.delete_transaction)
 
         exit_menu.add_command(label='Exit', command=top_level_window.destroy)
 
-        data_frame = Frame(top_level_window, height=500, width=500)
+        # Build window
+        data_frame = Frame(top_level_window, height=500, width=525)
         label_frame = Frame(top_level_window, height=25, width=500)
         middle_frame = Frame(top_level_window, height=50, width=500)
         ticker_frame = Frame(top_level_window, height=50, width=500)
@@ -91,6 +121,7 @@ class Gui:
         self.__status_object = status
         status.grid(row=0, sticky=EW)
 
+        # Dow ticker
         dow_ticker = Label(ticker_frame, text='DOW:')
         dow_ticker.grid_propagate(0)
         dow_ticker.grid(row=0, column=0)
@@ -100,6 +131,7 @@ class Gui:
         dow_value.grid_propagate(0)
         dow_value.grid(row=0, column=1)
 
+        # Nasdaq Ticker
         nasdaq_ticker = Label(ticker_frame, text='NASDAQ:')
         nasdaq_ticker.grid_propagate(0)
         nasdaq_ticker.grid(row=0, column=2)
@@ -109,6 +141,7 @@ class Gui:
         nasdaq_value.grid_propagate(0)
         nasdaq_value.grid(row=0, column=3)
 
+        # Nyse Ticker
         nyse_ticker = Label(ticker_frame, text = 'NYSE:')
         nyse_ticker.grid_propagate(0)
         nyse_ticker.grid(row=0, column=4)
@@ -145,6 +178,10 @@ class Gui:
         top_level_window.mainloop()
 
     def enter_stock_window(self):
+        """
+        Generates enter stock window
+        :return: None
+        """
         root_window = tkinter.Tk()
         root_window.title("Add Stock")
         entry_frame = Frame(root_window)
@@ -164,6 +201,10 @@ class Gui:
         root_window.mainloop()
 
     def process_stock_entry(self):
+        """
+        Process stock. Called by button on window
+        :return: None
+        """
         stock_name_to_add = self.__stock_entry_entry_object.get()
         database = Database()
         database.create_new_stock(stock_name_to_add)
@@ -171,7 +212,10 @@ class Gui:
         self.adjust_status("New Stock Added")
 
     def enter_transaction_window(self):
-
+        """
+        Enter Transaction for stock window
+        :return: None
+        """
         database = Database()
         stock_list = database.get_all_stocks()
         root_window = Toplevel()
@@ -220,12 +264,13 @@ class Gui:
         for x in range(len(stock_list)):
             radio = Radiobutton(radio_frame, text=stock_list[x].symbol, variable=self.enter_transaction_stock_radio_value, value=stock_list[x].symbol)
             radio.grid(row=x)
-
         root_window.mainloop()
 
-
     def process_transaction_entry(self):
-
+        """
+        Processes a transaction entry. Method called by button on window
+        :return: None
+        """
         action_object = None
         stock_name = self.enter_transaction_stock_radio_value.get()
         price = self.enter_transaction_window_price_entry.get()
@@ -244,7 +289,10 @@ class Gui:
         self.adjust_status("New Transaction Added")
 
     def delete_stock_window(self):
-
+        """
+        Creates delete stock window
+        :return: None
+        """
         database = Database()
         stockList = database.get_all_stocks()
         root = Toplevel()
@@ -269,6 +317,10 @@ class Gui:
         root.mainloop()
 
     def process_delete_stock(self):
+        """
+        Processes a delete stock request. Called by button on window
+        :return: None
+        """
         database = Database()
         stock_to_delete = database.get_stock(self.delete_stock_radio_value.get())
         database.delete_stock(stock_to_delete)
@@ -276,6 +328,10 @@ class Gui:
         self.adjust_status("Stock and associated transactions have been deleted")
 
     def delete_transaction(self):
+        """
+        generates delete transaction window
+        :return: None
+        """
         database = Database()
         stockList = database.get_all_stocks()
 
@@ -309,6 +365,10 @@ class Gui:
         root_window.mainloop()
 
     def add_delete_transactions_items(self):
+        """
+        generates transaction list frame for delete transaction
+        :return: None
+        """
         database = Database()
         tran_list = database.get_transactions(self.delete_transaction_get_stock_window_radio_selected_stock.get())
 
@@ -325,20 +385,30 @@ class Gui:
                           value=tran_list[x].tran_id)
              radio.grid(row=x+1)
 
-
     def process_delete_transaction(self):
+        """
+        Proceses a delete transaction. Called by button on window
+        :return:
+        """
         database = Database()
         database.delete_individual_transaction_using_primary_key(self.selected_tran_for_delete.get())
         self.delete_transaction_get_stock_window_object.destroy()
         self.adjust_status("Transaction deleted")
 
-
     def adjust_status(self, message):
+        """
+        Changes status message
+        :param message: string of message
+        :return: None
+        """
         self.__status_object.config(text=message)
 
-
-
     def adjust_stock_list(self, list_of_stocks):
+        """
+        adds stock information to main stock window of main window
+        :param list_of_stocks: list of stock objects
+        :return: none
+        """
         self.__stock_display_total = 0
         self.clear_stock_list()
         insert_string = ""
@@ -350,13 +420,13 @@ class Gui:
             for x in list_of_stocks:
                 insert_string += x.symbol
                 insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
-                insert_string += str(x.last_price)
+                insert_string += " " + "$" + str(x.last_price)
                 insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
                 insert_string += str(x.last_price_update)
                 insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
                 insert_string += str(x.calculate_current_shares())
                 insert_string += constants.STOCK_WINDOW_SPACE_BETWEEN_FIELDS
-                insert_string += str(x.calculate_current_shares()*x.last_price)
+                insert_string += "" + "$" + str(x.calculate_current_shares()*x.last_price)
                 self.__stock_display_total += x.calculate_current_shares() * x.last_price
                 self.__stocklist_object.insert(END, insert_string)
                 insert_string = ""
@@ -364,29 +434,58 @@ class Gui:
         self.adjust_portfolio_value(str(self.__stock_display_total))
 
     def clear_stock_list(self):
+        """
+        Clears stock window on main window
+        :return: None
+        """
         self.__stocklist_object.delete(0, END)
 
     def adjust_nyse_value(self, text):
+        """
+        Adjusts nyse stock composite index on ticker
+        :param text: string of value
+        :return: none
+        """
         if not isinstance(text, str):
             raise ValueError("Invalid input, use string")
         self.__nyse_ticker_value_object.config(text=text)
 
     def adjust_nasdaq_value(self, text):
+        """
+        Adjusts nasdaq stock composite index on ticker
+        :param text: string of value
+        :return:
+        """
         if not isinstance(text, str):
             raise ValueError("invalid input, use string")
         self.__nasdaq_ticker_value_object.config(text=text)
 
     def adjust_dow_value(self, text):
+        """
+        Adjusts dow stock composite index on ticker
+        :param text: string of value
+        :return: none
+        """
         if not isinstance(text, str):
             raise ValueError("Invalid input, use string")
         self.__dow_ticker_value_object.config(text=text)
 
     def adjust_portfolio_value(self, text):
+        """
+        Adjusts portfolio total on main screen
+        :param text: string of total value
+        :return: none
+        """
         if not isinstance(text, str):
             raise ValueError("Invalid input, use string")
         self.__portfolio_value_object.config(text=text)
 
     def generate_main_stock_window_list(self):
+        """
+        Gets list of current stock, gets current quote, and calls method to put on main window.
+        Call this method to execute list of current stocks on main window
+        :return: none
+        """
         database = Database()
         complete_list_of_stocks = []
         list_of_bare_stocks = database.get_all_stocks()
@@ -404,61 +503,71 @@ class Gui:
 
         self.adjust_stock_list(ready_for_display_stocks)
 
-    def profit_loss_window(self, stocklist):
+    def profit_loss_window(self):
+        """
+        Generates profit/loss data and window
+        :return: None
+        """
+        database = Database()
+        complete_list_of_stocks = []
+        list_of_bare_stocks = database.get_all_stocks()
+        ready_for_display_stocks = []
 
-        if not isinstance(stocklist, list):
-            raise ValueError("Wrong input type")
-        root = tkinter.Tk()
+        for x in list_of_bare_stocks:
+            item = database.get_stock(x.symbol)
+            complete_list_of_stocks.append(item)
 
+        api = Api()
+
+        for z in complete_list_of_stocks:
+            item = api.get_stock_quote(z)
+            ready_for_display_stocks.append(item)
+
+        root = Toplevel()
         label_frame = Frame(root)
         data_frame = Frame(root)
+        button_frame = Frame(root)
 
         label_frame.grid(row=0)
         data_frame.grid(row=1)
+        button_frame.grid(row=2)
 
         label = Label(label_frame, text='Stock   Total Buy Price     Total Sell Price   current holding  Profit')
-        data = Listbox(data_frame, width=250)
+
+        exit_button = Button(button_frame, text='Exit', command=root.destroy)
+
+        data = Listbox(data_frame, width=50, height=25)
+        data.grid_propagate(0)
         label.grid(row=0)
         data.grid(row=0)
+        exit_button.grid(row=0)
 
-        if len(stocklist) == 0:
+        if len(ready_for_display_stocks) == 0:
             data.insert(END, "No stocks saved")
         else:
             insert_string = ""
             total_buy = 0
             total_Sell = 0
-            for x in stocklist:
+            for x in ready_for_display_stocks:
                 insert_string += x.symbol
                 insert_string += "   "
                 insert_string += "$" + str(x.calculate_buy_or_sell_total_price(BuyTransaction()))
                 total_buy = x.calculate_buy_or_sell_total_price(BuyTransaction())
                 insert_string += "   "
-                insert_string += "$" + str(x.calculate_buy_or_sell_total_price(SellTransaction()))
+                insert_string += "  " + "$" + str(x.calculate_buy_or_sell_total_price(SellTransaction()))
                 total_Sell = x.calculate_buy_or_sell_total_price(SellTransaction())
                 insert_string += "   "
-                insert_string += str(x.last_price * x.calculate_current_shares())
+                insert_string += "  " + "$" + str(x.last_price * x.calculate_current_shares())
                 total_Sell += x.last_price * x.calculate_current_shares()
 
-                insert_string += "$" + str(total_Sell - total_buy)
+                insert_string += "   " + "$" + str(total_Sell - total_buy)
                 data.insert(END, insert_string)
                 total_Sell = 0
                 total_buy = 0
-
         root.mainloop()
+
 
 if __name__ == '__main__':
     test = Gui()
-
-    tran1 = Transaction("test", datetime.now(), BuyTransaction(), 10, 10)
-    tran2 = Transaction("test", datetime.now(), SellTransaction(), 10, 5)
-
-    tran_list = [tran1, tran2]
-
-    teststock = Stock("test")
-    teststock.last_price = 2.50
-    teststock.transactions = tran_list
-
-    inputstock = [teststock]
-
-    test.profit_loss_window(inputstock)
+    test.main_window()
 

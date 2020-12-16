@@ -1,3 +1,10 @@
+"""
+Program Name: Api.py
+Author: Ian Tibe
+Date of last modification: 12/16/2020
+
+Definition of Api class
+"""
 import requests
 import json
 import constants
@@ -6,9 +13,17 @@ from datetime import datetime
 
 class Api:
     def __init__(self):
+        """
+        Constructor
+        """
         pass
 
     def get_stock_quote(self, stock):
+        """
+        Gets stock quote from Api
+        :param stock: Stock object with stock data
+        :return: Identical stock object that was entered but with stock price and date property
+        """
         if not isinstance(stock, Stock):
             raise ValueError("Invalid input. Please use a Stock object")
         response = requests.get(constants.generate_url(stock.symbol))

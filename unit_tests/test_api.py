@@ -1,3 +1,10 @@
+"""
+Name of program: test_api.py
+Author: Ian Tibe
+Date of last modification: 12/16/2020
+
+Unit test for api
+"""
 import unittest
 from Api import Api
 from Stock import Stock
@@ -28,6 +35,7 @@ class MyTestCase(unittest.TestCase):
         test = self.testApi.get_stock_quote(self.testStock)
         self.assertIs(type(test.last_price), float)
         self.assertIs(type(test.last_price_update), datetime)
+
 
 if __name__ == '__main__':
     unittest.main()
