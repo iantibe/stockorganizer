@@ -142,7 +142,7 @@ class Gui:
         nasdaq_value.grid(row=0, column=3)
 
         # Nyse Ticker
-        nyse_ticker = Label(ticker_frame, text = 'NYSE:')
+        nyse_ticker = Label(ticker_frame, text = 'S&P:')
         nyse_ticker.grid_propagate(0)
         nyse_ticker.grid(row=0, column=4)
 
@@ -391,7 +391,7 @@ class Gui:
         :return:
         """
         database = Database()
-        database.delete_individual_transaction_using_primary_key(self.selected_tran_for_delete.get())
+        database.delete_individual_transaction_using_primary_key(int(self.selected_tran_for_delete.get()))
         self.delete_transaction_get_stock_window_object.destroy()
         self.adjust_status("Transaction deleted")
 
