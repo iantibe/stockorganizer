@@ -71,7 +71,7 @@ class Gui:
         """
         top_level_window = tkinter.Tk()
         self.top_window = top_level_window
-        top_level_window.title(constants.PROGRAM_NAME)
+        top_level_window.title(constants.PROGRAM_INFO["ProgramName"] + "   Version: " + constants.PROGRAM_INFO["Version"])
         # top_level_window.grid_propagate(0)
 
         # menu build
@@ -508,21 +508,28 @@ class Gui:
         Generates profit/loss data and window
         :return: None
         """
-        database = Database()
-        complete_list_of_stocks = []
-        list_of_bare_stocks = database.get_all_stocks()
-        ready_for_display_stocks = []
+        def get_data():
+            """
+            Gets data from profit loss window
+            :return:
+            """
+            database = Database()
+            complete_list_of_stocks = []
+            list_of_bare_stocks = database.get_all_stocks()
+            ready_for_display_stocks = []
 
-        for x in list_of_bare_stocks:
-            item = database.get_stock(x.symbol)
-            complete_list_of_stocks.append(item)
+            for x in list_of_bare_stocks:
+                item = database.get_stock(x.symbol)
+                complete_list_of_stocks.append(item)
 
-        api = Api()
+            api = Api()
 
-        for z in complete_list_of_stocks:
-            item = api.get_stock_quote(z)
-            ready_for_display_stocks.append(item)
+            for z in complete_list_of_stocks:
+                item = api.get_stock_quote(z)
+                ready_for_display_stocks.append(item)
+            return ready_for_display_stocks
 
+        display_stocks = get_data()
         root = Toplevel()
         label_frame = Frame(root)
         data_frame = Frame(root)
@@ -542,13 +549,13 @@ class Gui:
         data.grid(row=0)
         exit_button.grid(row=0)
 
-        if len(ready_for_display_stocks) == 0:
+        if len(display_stocks) == 0:
             data.insert(END, "No stocks saved")
         else:
             insert_string = ""
             total_buy = 0
             total_Sell = 0
-            for x in ready_for_display_stocks:
+            for x in display_stocks:
                 insert_string += x.symbol
                 insert_string += "   "
                 insert_string += "$" + str(x.calculate_buy_or_sell_total_price(BuyTransaction()))
@@ -562,6 +569,7 @@ class Gui:
 
                 insert_string += "   " + "$" + str(total_Sell - total_buy)
                 data.insert(END, insert_string)
+                insert_string = ""
                 total_Sell = 0
                 total_buy = 0
         root.mainloop()

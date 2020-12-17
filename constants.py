@@ -7,13 +7,13 @@ File contains constants, classes, and methods that are used through out the prog
 """
 from abc import ABC, abstractmethod
 
-# Program name
-PROGRAM_NAME = "Stock Organizer"
+# Program info
+PROGRAM_INFO = {"ProgramName": "Stock Organizer", "Version": "1.00"}
 
 # Name of database file
 DATABASENAME = "stock_database"
 
-# Key provided by api to access api
+# Key provided by Alphavantage.co to access api
 API_KEY = "0S5TK5I9Z6K65PMB"
 
 # Api error response

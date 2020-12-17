@@ -76,7 +76,7 @@ class Stock:
             total = 0
             for x in self.transactions:
                 if x.get_text_of_tran_type() == operation.tran_type():
-                    total += x.price
+                    total += x.price * x.number_of_shares
             return total
 
         else:
